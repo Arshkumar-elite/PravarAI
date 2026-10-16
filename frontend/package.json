@@ -4,12 +4,13 @@
   "private": true,
   "scripts": {
     "dev": "next dev --hostname 127.0.0.1",
-    "build": "next build",
+    "build": "next build --webpack",
     "start": "next start --hostname 0.0.0.0",
     "lint": "eslint .",
-    "typecheck": "tsc --noEmit",
+    "typecheck": "next typegen && tsc --noEmit",
     "test": "vitest run",
-    "test:e2e": "playwright test"
+    "test:e2e": "playwright test",
+    "demo": "playwright test --config playwright.demo.config.ts"
   },
   "engines": {
     "node": ">=24 <25"
@@ -44,8 +45,13 @@
     "eslint": "^9.39.5",
     "eslint-config-next": "^16.4.2",
     "jsdom": "^29.1.1",
+    "prettier": "^3.9.10",
     "tailwindcss": "^4.3.3",
     "typescript": "^6.0.3",
     "vitest": "^5.0.5"
+  },
+  "optionalDependencies": {
+    "@rolldown/binding-darwin-arm64": "^1.2.14",
+    "@rolldown/binding-linux-x64-gnu": "^1.2.14"
   }
 }

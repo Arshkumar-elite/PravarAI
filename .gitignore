@@ -1,5 +1,6 @@
 node_modules/
 .next/
+.next-e2e/
 out/
 .venv/
 __pycache__/
@@ -16,5 +17,6 @@ coverage/
 test-results/
 playwright-report/
 *.tsbuildinfo
+next-env.d.ts
 backend/data/
 .cache/

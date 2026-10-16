@@ -7,7 +7,10 @@ export function useClock() {
     update();
     const timer = window.setInterval(update, 60_000);
     window.addEventListener("focus", update);
-    return () => { window.clearInterval(timer); window.removeEventListener("focus", update); };
+    return () => {
+      window.clearInterval(timer);
+      window.removeEventListener("focus", update);
+    };
   }, []);
   return now;
 }

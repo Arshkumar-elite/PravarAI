@@ -1,5 +1,12 @@
-export const statuses = ["New", "Contacted", "Qualified", "Proposal Sent", "Won", "Lost"] as const;
-export type Status = typeof statuses[number];
+export const statuses = [
+  "New",
+  "Contacted",
+  "Qualified",
+  "Proposal Sent",
+  "Won",
+  "Lost",
+] as const;
+export type Status = (typeof statuses)[number];
 export interface Lead {
   id: number;
   name: string;
@@ -19,6 +26,11 @@ export interface Discussion {
   follow_up_at: string | null;
   created_at: string;
 }
-export interface LeadDetail extends Lead { discussions: Discussion[] }
-export interface DiscussionResult { discussion: Discussion; lead: Lead }
+export interface LeadDetail extends Lead {
+  discussions: Discussion[];
+}
+export interface DiscussionResult {
+  discussion: Discussion;
+  lead: Lead;
+}
 export type FollowFilter = "All" | "Today" | "Overdue" | "Upcoming";
