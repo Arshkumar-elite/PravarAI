@@ -125,5 +125,7 @@ from executing. Status and overdue meanings are written out, not conveyed by col
 - SQLite is persisted in a named Compose volume; `docker compose down` preserves it.
 - Production builds use supported webpack after a local Turbopack worker failed.
 - Explicit optional Rolldown bindings work around npm's incomplete optional-dependency
-  installation for the Mac ARM64 and Linux x64 test environments.
+  installation for the Mac ARM64 and Linux x64 test environments. The lock retains all
+  platform variants and nested ESLint validators needed by npm 11 and npm 12; validate
+  both targets when refreshing dependencies, because older npm can prune platform entries.
 - CI runs application checks, browsers, and a Compose persistence comparison.

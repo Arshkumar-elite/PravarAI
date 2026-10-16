@@ -3,6 +3,8 @@
 A focused workspace for leads, conversations, and the next follow-up. Built for the
 PravarAI fullstack assessment with **Next.js, FastAPI, and SQLite**.
 
+[Verified CI: 48 tests, production build, and Docker persistence](https://github.com/Arshkumar-elite/PravarAI/actions/runs/38925192304).
+
 ![LeadFlow desktop workspace](docs/screenshots/workspace-1440.png)
 
 ## What works
