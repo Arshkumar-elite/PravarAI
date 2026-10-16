@@ -15,13 +15,15 @@ def db_engine(tmp_path):
 
 
 @pytest.fixture
-def client(db_engine):
+def client(db_engine, monkeypatch):
+    monkeypatch.setattr("app.main.create_tables", lambda: None)
+
     def override_session():
         with Session(db_engine) as session:
             yield session
 
     app.app.dependency_overrides[get_session] = override_session
-    # No lifespan: fixtures create the isolated schema, never the user's database.
+    # Fixtures create the isolated schema; lifespan must not touch the user database.
     with TestClient(app, raise_server_exceptions=False) as test_client:
         yield test_client
     app.app.dependency_overrides.clear()
