@@ -4,6 +4,46 @@ import fs from "node:fs/promises";
 
 const API = "http://127.0.0.1:8001/api";
 
+test("long contact details and notes fit a short mobile viewport", async ({
+  page,
+  request,
+}) => {
+  const name = "Long " + "x".repeat(115);
+  const lead = await (
+    await request.post(`${API}/leads`, {
+      data: {
+        name,
+        company: "Company".repeat(22),
+        phone: "+1 " + "1".repeat(37),
+      },
+    })
+  ).json();
+  const note = "<script>not executable</script> " + "Long note ".repeat(490);
+  await request.post(`${API}/leads/${lead.id}/discussions`, { data: { note } });
+  await page.setViewportSize({ width: 360, height: 640 });
+  await page.goto("/");
+  await page.getByRole("searchbox").fill(name);
+  expect(
+    await page.evaluate(
+      () => document.documentElement.scrollWidth <= window.innerWidth,
+    ),
+  ).toBe(true);
+  await page.getByRole("button", { name: `Open ${name}`, exact: true }).click();
+  const dialog = page.getByRole("dialog");
+  await expect(dialog.locator(".discussion-card p")).toHaveText(note);
+  expect(await dialog.locator("script").count()).toBe(0);
+  expect(
+    await dialog.evaluate(
+      (element) => element.scrollWidth <= element.clientWidth,
+    ),
+  ).toBe(true);
+  await dialog
+    .getByLabel("Add a discussion")
+    .fill("The composer remains reachable.");
+  await dialog.getByRole("button", { name: "Save note" }).click();
+  await expect(dialog.getByLabel("Add a discussion")).toHaveValue("");
+});
+
 test("real API reminders pin immediately and history is newest first", async ({
   page,
   request,

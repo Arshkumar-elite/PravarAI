@@ -21,7 +21,11 @@ with tempfile.TemporaryDirectory(prefix="leadflow-e2e-") as folder:
                 "from datetime import UTC, datetime; from sqlmodel import Session; "
                 "from app.database import engine, create_tables; from app.seed import seed; "
                 "create_tables(); s=Session(engine); "
-                "seed(s, datetime(2026,10,16,6,30,tzinfo=UTC)); s.close()"
+                + (
+                    "seed(s); s.close()"
+                    if os.environ.get("LEADFLOW_DEMO_REAL_TIME") == "1"
+                    else "seed(s, datetime(2026,10,16,6,30,tzinfo=UTC)); s.close()"
+                )
             ),
         ],
         env=env,

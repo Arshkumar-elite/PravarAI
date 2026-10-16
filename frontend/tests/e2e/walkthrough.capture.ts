@@ -5,7 +5,7 @@ import fs from "node:fs/promises";
 test("LeadFlow submission walkthrough", async ({ page }) => {
   await fs.mkdir("../docs/screenshots", { recursive: true });
   await fs.mkdir("../docs/video", { recursive: true });
-  await page.clock.install({ time: new Date("2026-10-16T06:30:00Z") });
+  await page.clock.install({ time: new Date() });
   await page.goto("/");
   await expect(
     page.getByRole("button", { name: "Open Sofia Chen", exact: true }),
@@ -49,7 +49,13 @@ test("LeadFlow submission walkthrough", async ({ page }) => {
       { delay: 45 },
     );
   await page.getByLabel("Set follow-up", { exact: true }).check();
-  await page.getByLabel("Follow-up date and time").fill("2026-10-16T16:00");
+  const followUp = await page.evaluate(() => {
+    const date = new Date();
+    date.setHours(Math.min(date.getHours() + 1, 23), 59, 0, 0);
+    const pad = (value: number) => String(value).padStart(2, "0");
+    return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}`;
+  });
+  await page.getByLabel("Follow-up date and time").fill(followUp);
   await page.waitForTimeout(9_000);
   await page.getByRole("button", { name: "Save note" }).click();
   await expect(

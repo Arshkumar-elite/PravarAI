@@ -380,10 +380,9 @@ h1 {
   position: relative;
   cursor: pointer;
   display: grid;
-  grid-template-columns: minmax(190px, 1fr) minmax(180px, 1.65fr) minmax(
-      178px,
-      0.8fr
-    ) 16px;
+  grid-template-columns:
+    minmax(190px, 1fr) minmax(180px, 1.65fr) minmax(178px, 0.8fr)
+    16px;
   align-items: center;
   gap: 23px;
   text-align: left;
@@ -827,6 +826,10 @@ h1 {
   align-items: center;
   gap: 13px;
   padding-right: 25px;
+}
+.timeline-person > div {
+  min-width: 0;
+  overflow-wrap: anywhere;
 }
 .avatar-large {
   width: 45px;

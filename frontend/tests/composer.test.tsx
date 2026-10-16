@@ -1,4 +1,10 @@
-import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import {
+  act,
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+} from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { expect, it, vi } from "vitest";
 import { DiscussionComposer } from "@/components/discussion-composer";
@@ -57,7 +63,27 @@ it("requires a date when follow-up is enabled", async () => {
   expect(save).not.toHaveBeenCalled();
 });
 
-it("disables repeated submissions while a save is in progress", () => {
-  render(<DiscussionComposer onSave={vi.fn()} busy error={undefined} />);
-  expect(screen.getByRole("button", { name: "Save note" })).toBeDisabled();
+it("sends only one request when clicked again before the save resolves", async () => {
+  let finish!: () => void;
+  const save = vi.fn(
+    () =>
+      new Promise<void>((resolve) => {
+        finish = resolve;
+      }),
+  );
+  render(<DiscussionComposer onSave={save} busy={false} error={undefined} />);
+  await userEvent.type(
+    screen.getByLabelText("Add a discussion"),
+    "One conversation",
+  );
+  const button = screen.getByRole("button", { name: "Save note" });
+  await userEvent.dblClick(button);
+  await waitFor(() => expect(save).toHaveBeenCalledTimes(1));
+  expect(button).toBeDisabled();
+  await userEvent.click(button);
+  expect(save).toHaveBeenCalledTimes(1);
+  await act(async () => finish());
+  await waitFor(() =>
+    expect(screen.getByLabelText("Add a discussion")).toHaveValue(""),
+  );
 });
