@@ -1,0 +1,67 @@
+name: LeadFlow checks
+on:
+  push:
+    branches: [main]
+  pull_request:
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - uses: astral-sh/setup-uv@v6
+        with:
+          version: '0.11.28'
+          enable-cache: true
+          cache-dependency-glob: backend/uv.lock
+      - name: Install backend
+        working-directory: backend
+        run: uv sync --frozen --python 3.13
+      - name: Backend checks
+        working-directory: backend
+        run: |
+          uv run ruff check app tests
+          uv run ruff format --check app tests
+          uv run pytest -q
+      - name: Install frontend
+        working-directory: frontend
+        run: npm ci
+      - name: Frontend checks
+        working-directory: frontend
+        run: |
+          npm run lint
+          npm run typecheck
+          npm run test
+          npm run build
+      - name: Browser dependencies
+        working-directory: frontend
+        run: npx playwright install --with-deps chromium webkit
+      - name: Browser tests
+        working-directory: frontend
+        run: npm run test:e2e
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: browser-evidence
+          path: |
+            frontend/playwright-report
+            frontend/test-results
+          retention-days: 7
+      - name: Compose smoke and persistence
+        run: |
+          docker compose up --build -d --wait
+          docker compose exec -T api /app/.venv/bin/python -m app.seed
+          curl --fail http://localhost:8000/api/leads > /tmp/leads-before.json
+          docker compose restart api
+          docker compose up -d --wait
+          curl --fail http://localhost:8000/api/leads > /tmp/leads-after.json
+          cmp /tmp/leads-before.json /tmp/leads-after.json
+          curl --fail http://localhost:3000 > /dev/null
+      - name: Compose cleanup
+        if: always()
+        run: docker compose down
